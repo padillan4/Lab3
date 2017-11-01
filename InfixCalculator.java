@@ -2,28 +2,22 @@ import java.util.InputMismatchException;
 
 public final class InfixCalculator {
 	
-	public static String convertToPostfix(String infix) throws InputMismatchException{
+	public static Integer convertToPostfix(String infix) throws InputMismatchException{
 	    Stack<Character> stack = new Stack<Character>();
 	    Stack<Character> parenMatch = new Stack<Character>();
-	    char[] c = infix.toCharArray();
 	    String postfixString = "";
 	    InputMismatchException e = new InputMismatchException();
-	    String[] splitArray = infix.split("[^0-9]");
-	    String[] intArray = new String[splitArray.length];
+	    String[] intOperands = infix.split("[^0-9]");
+	    MyLinkedList<String> listIntOperands = new MyLinkedList<>();
 	    
-	    for(int i = 0; i < splitArray.length; i++) {
-	    	System.out.println(splitArray[i] + " ");
-	    	if(splitArray[i].matches("[0-9]")) {
-	    		intArray[i] = splitArray[i];
+	    for(int i = 0; i < intOperands.length; i++) {
+	    	if(intOperands[i].matches("\\b\\d+\\b")) {
+	    		listIntOperands.add(intOperands[i]);
 	    	}
 	    }
 	    
-	    for(int i = 0; i < intArray.length; i++) {
-	    	System.out.println(intArray[i] + " ");
-	    	
-	    }
-	    
-	    for(char val : c) {
+	    for(int i = 0; i < infix.length(); i++) {
+	    	char val = infix.charAt(i);
 	    	if(val == '(') {
 	    		stack.push(val);
 	    		parenMatch.push(val);
@@ -35,8 +29,9 @@ public final class InfixCalculator {
                 while (!(oper.equals('(')) && !(stack.isEmpty())) {
                     stack.pop();
                     postfixString += oper.charValue() + " ";
-                    if (!stack.isEmpty())
+                    if (!stack.isEmpty()) {
                         oper = stack.peek();
+                    }
                 }
                 stack.pop();
             }
@@ -65,8 +60,16 @@ public final class InfixCalculator {
                 }
             } 
 	    	else {
-                postfixString += val + " ";
+	    		Character oper = infix.charAt(i+1);
+	    		
+	    		if(!(listIntOperands.isEmpty()) && !(Character.isDigit(oper))) {
+	    			postfixString += listIntOperands.get(0) + " ";
+	    			listIntOperands.remove(0);
+	    		}
             }
+        }
+	    if(!(parenMatch.isEmpty())) {
+        	throw e;
         }
         while (!stack.isEmpty()) {
             Character oper = stack.peek();
@@ -75,9 +78,6 @@ public final class InfixCalculator {
                 postfixString += oper.charValue() + " ";
             }
         }
-        if(!(parenMatch.isEmpty())) {
-        	throw e;
-        }
-        return postfixString;
+        return PostfixCalculator.postFixCalc(postfixString);
 	}
 }
